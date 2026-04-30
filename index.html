@@ -3,172 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiteControl | Operational Environment</title>
+    <title>SiteControl | Operational Simulation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --accent: #3b82f6; --bg: #000000; --card: #111111; }
+        :root { --accent: #f59e0b; --bg: #000; --card: #111; }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .ops-card { background: var(--card); border: 1px solid #222; border-radius: 1.25rem; transition: transform 0.2s; }
-        .screen { display: none; height: calc(100vh - 128px); overflow-y: auto; padding: 1.5rem; }
+        .ops-card { background: var(--card); border: 1px solid #222; border-radius: 1rem; }
+        .screen { display: none; height: calc(100vh - 140px); overflow-y: auto; padding: 1.25rem; }
         .screen.active { display: block; }
-        .progress-circle { background: conic-gradient(var(--accent) var(--p), #222 0); border-radius: 50%; }
-        .msg-bubble { max-width: 85%; padding: 0.75rem 1rem; border-radius: 1rem; font-size: 0.875rem; }
-        @property --p { syntax: '<number>'; inherits: false; initial-value: 0; }
+        .nav-btn { font-size: 0.7rem; font-weight: 800; color: #555; text-transform: uppercase; transition: 0.2s; }
+        .nav-btn.active { color: var(--accent); }
+        .btn-action { background: #222; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-align: left; }
+        .btn-action:hover { background: #333; border-color: var(--accent); }
+        .status-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="flex flex-col h-screen">
 
-    <section id="login" class="fixed inset-0 z-[100] bg-black flex items-center justify-center p-6">
-        <div class="ops-card p-8 w-full max-w-sm">
-            <div class="mb-8 text-center">
-                <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 font-bold text-xl">SC</div>
-                <h1 class="text-2xl font-bold">Terminal Login</h1>
+    <section id="login-screen" class="fixed inset-0 z-[300] bg-black flex items-center justify-center p-6">
+        <div class="ops-card p-8 w-full max-w-sm border-orange-500/30">
+            <div class="mb-6 text-center">
+                <div class="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 font-black text-black text-2xl">SC</div>
+                <h1 class="text-2xl font-bold">SiteControl Ops</h1>
+                <p class="text-zinc-500 text-xs mt-1">Operational Environment v1.0</p>
             </div>
             <div class="space-y-4">
-                <input type="text" id="user-name" placeholder="Full Name" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl outline-none focus:border-blue-500">
-                <select id="user-role" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl outline-none">
-                    <option value="Manager">Manager</option>
-                    <option value="Supervisor">Supervisor</option>
-                    <option value="Client">Client</option>
+                <input type="text" id="user-name" placeholder="Enter Name" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl outline-none focus:border-orange-500 text-sm">
+                <select id="user-role" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl outline-none text-sm">
+                    <option value="Manager">Manager (Strategic)</option>
+                    <option value="Supervisor">Supervisor (Tactical)</option>
+                    <option value="Officer">Officer (Operations)</option>
+                    <option value="Client">Client (Oversight)</option>
                 </select>
-                <button onclick="initSim()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-500 transition">Open Console</button>
+                <button onclick="startSim()" class="w-full bg-orange-500 text-black py-4 rounded-xl font-black uppercase tracking-widest hover:bg-orange-400 transition">Initialize</button>
             </div>
         </div>
     </section>
 
-    <header class="h-16 flex items-center justify-between px-6 border-b border-zinc-800 shrink-0">
+    <header class="h-16 flex items-center justify-between px-6 border-b border-zinc-900 shrink-0 bg-black">
         <div>
-            <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-tighter">SiteControl Ops</h2>
-            <p id="site-name" class="font-bold">Harbor Point Tower</p>
+            <p id="display-role" class="text-[10px] font-black text-orange-500 uppercase tracking-widest">OFFICER DASHBOARD</p>
+            <h2 id="site-title" class="text-lg font-bold">Harbor Point Tower</h2>
         </div>
         <div class="flex items-center gap-4">
-            <div class="text-right"><p id="timer" class="text-sm font-mono">10:00 AM</p></div>
-            <div id="u-initials" class="h-10 w-10 bg-zinc-800 rounded-full flex items-center justify-center font-bold text-sm">CJ</div>
+            <div class="text-right">
+                <p id="clock" class="text-sm font-mono leading-none">08:00 AM</p>
+                <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-tighter">Live Ops</p>
+            </div>
+            <div id="initials-box" class="h-10 w-10 bg-zinc-800 rounded-full flex items-center justify-center font-bold text-sm border border-zinc-700">CJ</div>
         </div>
     </header>
 
-    <main class="flex-1">
+    <main class="flex-1 relative">
         <div id="view-dash" class="screen active">
-            <div class="ops-card p-6 mb-6 flex justify-between items-center">
-                <div>
-                    <h3 class="text-zinc-500 text-xs font-bold uppercase">Today's Readiness</h3>
-                    <p id="readiness-val" class="text-4xl font-bold mt-1">0%</p>
-                    <span id="risk-status" class="text-[10px] bg-red-900/40 text-red-400 px-2 py-0.5 rounded-full">1 risk item</span>
+            <div class="ops-card p-6 mb-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-zinc-500 text-[10px] font-black uppercase">Readiness</h3>
+                        <p id="readiness-val" class="text-5xl font-black">100%</p>
+                    </div>
+                    <div id="coverage-ring" class="w-16 h-16 rounded-full border-4 border-green-500 flex items-center justify-center">
+                        <span class="text-[10px] font-bold">OK</span>
+                    </div>
                 </div>
-                <div id="circle-ui" class="w-20 h-20 progress-circle flex items-center justify-center" style="--p: 0">
-                    <div class="w-16 h-16 bg-black rounded-full"></div>
+                <div id="alert-bar" class="mt-4 text-[10px] text-green-500 font-bold flex items-center gap-2">
+                    <span class="h-2 w-2 bg-green-500 rounded-full status-pulse"></span> SYSTEM NOMINAL
                 </div>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <div class="ops-card p-4"><p class="text-2xl font-bold" id="task-stat">0/4</p><p class="text-[10px] text-zinc-500 uppercase">Tasks</p></div>
-                <div class="ops-card p-4"><p class="text-2xl font-bold text-green-500" id="coverage-stat">100%</p><p class="text-[10px] text-zinc-500 uppercase">Coverage</p></div>
             </div>
 
-            <h3 class="font-bold mb-4">Priority Checklist</h3>
-            <div id="checklist" class="space-y-3">
-                </div>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="ops-card p-4"><p id="task-stat" class="text-2xl font-bold">0/4</p><p class="text-[10px] text-zinc-500 font-bold uppercase">Tasks</p></div>
+                <div class="ops-card p-4"><p id="stat-sites" class="text-2xl font-bold">3</p><p class="text-[10px] text-zinc-500 font-bold uppercase">Sites</p></div>
+            </div>
+
+            <h3 class="font-black text-sm uppercase mb-4 tracking-tighter">Priority Incident Log</h3>
+            <div id="log-container" class="space-y-2">
+                <div class="text-[10px] font-mono text-zinc-600 italic">> Awaiting operational data...</div>
+            </div>
         </div>
 
         <div id="view-sched" class="screen">
-            <h2 class="text-xl font-bold mb-6">Security Staffing</h2>
-            <div id="uncovered-alert" class="hidden bg-red-900/20 border border-red-900/50 p-4 rounded-xl mb-6">
-                <p class="text-red-400 font-bold">🚨 1 UNCOVERED POST</p>
-                <p class="text-xs text-red-300/70">Officer call-off reported at ER Entrance.</p>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black">Staffing Matrix</h2>
+                <span id="sched-status" class="status-badge bg-green-900/30 text-green-400 text-[10px] px-2 py-1 rounded">Fully Staffed</span>
             </div>
-            <div class="ops-card p-6 space-y-4">
-                <h3 class="text-sm font-bold text-zinc-400">Manual Assignment</h3>
-                <input type="text" placeholder="Shift: ER Entrance" class="w-full bg-zinc-900 p-3 rounded-lg border border-zinc-800" readonly>
-                <button onclick="fixStaffing()" class="w-full bg-zinc-100 text-black font-bold py-3 rounded-lg">Assign Officer Johnson (OT)</button>
+            <div id="uncovered-card" class="hidden ops-card p-4 border-l-4 border-orange-500 mb-4">
+                <p class="text-xs font-bold text-orange-500">Staffing Gap Detected</p>
+                <p class="text-lg font-black mb-3" id="gap-site">ER Entrance (10PM-6AM)</p>
+                <button onclick="resolveStaffing()" class="w-full bg-white text-black font-black py-3 rounded-lg text-xs uppercase">Assign Replacement (OT)</button>
+            </div>
+            <div id="roster" class="space-y-2 opacity-50">
+                <div class="ops-card p-3 text-xs flex justify-between"><span>North Gate</span><span class="text-green-500">M. Reyes</span></div>
+                <div class="ops-card p-3 text-xs flex justify-between"><span>Lobby Desk</span><span class="text-green-500">A. Stone</span></div>
             </div>
         </div>
 
         <div id="view-msgs" class="screen">
-            <div id="msg-container" class="space-y-4">
-                <div class="flex flex-col items-start">
-                    <div class="msg-bubble bg-zinc-800 text-zinc-300">L. Chen: Panel room is ready for inspection after lunch.</div>
-                    <span class="text-[10px] text-zinc-600 mt-1">08:05 AM</span>
-                </div>
+            <div class="flex gap-2 mb-4">
+                <button onclick="switchThread('Internal')" id="t-int" class="text-[10px] font-bold px-3 py-1 bg-zinc-800 rounded-full text-orange-500">Internal</button>
+                <button onclick="switchThread('Client')" id="t-cli" class="text-[10px] font-bold px-3 py-1 bg-zinc-900 rounded-full text-zinc-500">Client</button>
+            </div>
+            <div id="msg-box" class="space-y-4 font-medium text-sm">
+                <div class="text-center text-zinc-700 text-[10px] italic">Live thread established...</div>
+            </div>
+        </div>
+
+        <div id="scen-modal" class="fixed inset-0 z-[400] bg-black/95 hidden items-center justify-center p-6 text-center">
+            <div class="ops-card p-8 border-orange-500 border-2 w-full max-w-sm">
+                <p id="scen-time" class="text-orange-500 font-mono text-xs mb-1">08:00 AM</p>
+                <h2 id="scen-title" class="text-2xl font-black italic mb-2 tracking-tighter">ALERT</h2>
+                <p id="scen-desc" class="mb-6 text-zinc-400 text-sm leading-relaxed">Officer is late for shift.</p>
+                <div id="scen-opts" class="flex flex-col gap-2"></div>
+            </div>
+        </div>
+
+        <div id="score-screen" class="fixed inset-0 z-[500] bg-black hidden flex-col items-center justify-center p-8 text-center">
+            <h1 class="text-orange-500 font-black italic text-4xl mb-2">OPERATIONAL REVIEW</h1>
+            <p id="final-rank" class="text-2xl font-bold mb-4">ELITE OPERATOR</p>
+            <div id="final-score" class="text-7xl font-black mb-8">100%</div>
+            <div id="feedback-list" class="text-left text-sm text-zinc-500 space-y-2 mb-10 max-w-xs"></div>
+            <div class="border-t border-zinc-800 pt-6 w-full max-w-xs">
+                <p class="text-xs text-zinc-600 mb-1">Developed from field experience by</p>
+                <p class="font-bold text-lg">Cory Johnson</p>
+                <p class="text-orange-500 text-[10px] font-bold uppercase tracking-widest">Operations & Security Management</p>
+                <a href="https://linkedin.com" class="inline-block mt-6 bg-[#0077b5] text-white px-6 py-2 rounded-full font-bold text-xs">LinkedIn Profile</a>
             </div>
         </div>
     </main>
 
-    <nav class="h-16 border-t border-zinc-800 flex justify-around items-center bg-black shrink-0">
-        <button onclick="nav('dash')" class="text-blue-500 text-xs font-bold">Dashboard</button>
-        <button onclick="nav('sched')" class="text-zinc-500 text-xs font-bold">Schedule</button>
-        <button onclick="nav('msgs')" class="text-zinc-500 text-xs font-bold">Messages</button>
-    </nav>
-
-    <div id="sim-modal" class="fixed inset-0 z-[200] bg-black/90 hidden items-center justify-center p-6 text-center">
-        <div class="ops-card p-8 border-red-600 border-2 max-w-sm">
-            <h2 id="sim-title" class="text-2xl font-black italic text-red-500 mb-2 underline">CALL-OFF ALERT</h2>
-            <p id="sim-desc" class="mb-6 text-zinc-300">A client update was received but not confirmed. The site coverage is dropping.</p>
-            <button onclick="closeModal()" class="w-full bg-red-600 py-3 rounded-xl font-bold">Acknowledge & Respond</button>
-        </div>
-    </div>
+    <footer class="h-16 border-t border-zinc-900 flex justify-around items-center bg-black shrink-0">
+        <button onclick="nav('dash')" id="nav-dash" class="nav-btn active">Dashboard</button>
+        <button onclick="nav('sched')" id="nav-sched" class="nav-btn">Schedule</button>
+        <button onclick="nav('msgs')" id="nav-msgs" class="nav-btn">Messages</button>
+    </footer >
 
     <script>
-        let simData = { score: 100, completed: 0, time: "10:00 AM", mistakes: [] };
-        const tasks = [
-            { id: 1, text: "North gate safety walk", sub: "Access · M. Reyes · 08:30" },
-            { id: 2, text: "Crane lift exclusion zone", sub: "Deck B · A. Stone · 10:00" },
-            { id: 3, text: "Concrete delivery signoff", sub: "Floor 4 · J. Patel · 12:15" },
-            { id: 4, text: "Electrical rough-in check", sub: "Level 3 · L. Chen · 15:00" }
+        let sim = { 
+            name: '', role: '', score: 100, step: 0, time: 480, 
+            history: [], activeThread: 'Internal', notified: false 
+        };
+
+        const scenarioList = [
+            { 
+                time: 485, role: 'Manager', title: "OFFICER LATE", desc: "Front Desk officer is late for 08:00 start.", 
+                opts: [
+                    { t: "Pull 10AM Officer Early", c: true, f: "Coverage maintained." },
+                    { t: "Wait for late officer", c: false, f: "Safety gap created at Lobby." }
+                ] 
+            },
+            { 
+                time: 500, role: 'Manager', title: "CLIENT UPDATE", desc: "Client: 'Deliveries moved to 5PM.'", 
+                opts: [
+                    { t: "Confirm & Notify Client", c: true, f: "Communication loop closed." },
+                    { t: "Update Logs Only", c: false, f: "Client notification missed." }
+                ] 
+            },
+            { 
+                time: 520, role: 'Manager', title: "CALL-OFF ALERT", desc: "Main Entry uncovered (10PM-6AM).", 
+                type: 'staffing'
+            }
         ];
 
-        function initSim() {
-            const name = document.getElementById('user-name').value || "Cory Johnson";
-            document.getElementById('u-initials').innerText = name.split(' ').map(n=>n[0]).join('');
-            document.getElementById('login').style.display = 'none';
-            renderChecklist();
-            
-            // Scenario 1: Automatic Call-off after 5 seconds
-            setTimeout(() => {
-                document.getElementById('sim-modal').style.display = 'flex';
-                document.getElementById('uncovered-alert').classList.remove('hidden');
-                document.getElementById('coverage-stat').innerText = "67%";
-                document.getElementById('coverage-stat').classList.replace('text-green-500', 'text-red-500');
-            }, 5000);
+        function startSim() {
+            sim.name = document.getElementById('user-name').value || "Operator";
+            sim.role = document.getElementById('user-role').value;
+            document.getElementById('display-role').innerText = sim.role.toUpperCase() + " DASHBOARD";
+            document.getElementById('initials-box').innerText = sim.name.split(' ').map(n=>n[0]).join('');
+            document.getElementById('login-screen').style.display = 'none';
+            setInterval(tick, 1000);
         }
 
-        function renderChecklist() {
-            const container = document.getElementById('checklist');
-            tasks.forEach(t => {
-                const item = document.createElement('div');
-                item.className = "ops-card p-4 flex items-center gap-4 cursor-pointer";
-                item.innerHTML = `
-                    <input type="checkbox" onchange="taskUpdate(this)" class="w-6 h-6 rounded-full border-zinc-700 bg-transparent text-blue-500">
-                    <div><p class="text-sm font-bold">${t.text}</p><p class="text-[10px] text-zinc-500">${t.sub}</p></div>
-                `;
-                container.appendChild(item);
+        function tick() {
+            sim.time += 1;
+            let h = Math.floor(sim.time / 60);
+            let m = sim.time % 60;
+            document.getElementById('clock').innerText = `${h}:${m < 10 ? '0'+m : m} AM`;
+            
+            let ev = scenarioList.find(e => e.time === sim.time);
+            if (ev) triggerScenario(ev);
+        }
+
+        function triggerScenario(ev) {
+            if (ev.type === 'staffing') {
+                document.getElementById('uncovered-card').classList.remove('hidden');
+                document.getElementById('readiness-val').innerText = "67%";
+                document.getElementById('coverage-ring').style.borderColor = "#f59e0b";
+                document.getElementById('alert-bar').innerHTML = '<span class="h-2 w-2 bg-orange-500 rounded-full status-pulse"></span> STAFFING GAP';
+                document.getElementById('alert-bar').className = "mt-4 text-[10px] text-orange-500 font-bold flex items-center gap-2";
+                return;
+            }
+            const m = document.getElementById('scen-modal');
+            m.style.display = 'flex';
+            document.getElementById('scen-title').innerText = ev.title;
+            document.getElementById('scen-desc').innerText = ev.desc;
+            document.getElementById('scen-time').innerText = document.getElementById('clock').innerText;
+            
+            const optBox = document.getElementById('scen-opts');
+            optBox.innerHTML = '';
+            ev.opts.forEach(o => {
+                let b = document.createElement('button');
+                b.className = "bg-zinc-800 p-4 rounded-xl text-xs font-bold hover:bg-orange-500 hover:text-black transition";
+                b.innerText = o.t;
+                b.onclick = () => makeChoice(o);
+                optBox.appendChild(b);
             });
         }
 
-        function taskUpdate(cb) {
-            simData.completed += cb.checked ? 1 : -1;
-            const pct = (simData.completed / 4) * 100;
-            document.getElementById('readiness-val').innerText = pct + "%";
-            document.getElementById('task-stat').innerText = simData.completed + "/4";
-            document.getElementById('circle-ui').style.setProperty('--p', pct + "%");
-            if(pct === 100) {
-                document.getElementById('risk-status').innerText = "On Track";
-                document.getElementById('risk-status').className = "text-[10px] bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full";
-            }
+        function makeChoice(o) {
+            if (!o.c) { sim.score -= 15; sim.history.push("⚠️ " + o.f); }
+            else { sim.history.push("✅ " + o.f); }
+            document.getElementById('scen-modal').style.display = 'none';
+            logAction(o.f);
+            if (sim.history.length >= 3) finishSim();
         }
 
-        function fixStaffing() {
-            document.getElementById('uncovered-alert').innerHTML = "<p class='text-green-400 font-bold'>✓ POST COVERED</p>";
-            document.getElementById('coverage-stat').innerText = "100%";
-            document.getElementById('coverage-stat').classList.replace('text-red-500', 'text-green-500');
-            alert("Staffing updated. Logic applied: Officer Johnson moved to OT.");
+        function logAction(msg) {
+            const l = document.getElementById('log-container');
+            let d = document.createElement('div');
+            d.className = "text-[10px] font-mono text-zinc-400";
+            d.innerText = `> ${msg}`;
+            l.prepend(d);
+        }
+
+        function resolveStaffing() {
+            document.getElementById('uncovered-card').classList.add('hidden');
+            document.getElementById('readiness-val').innerText = "100%";
+            document.getElementById('coverage-ring').style.borderColor = "#22c55e";
+            document.getElementById('alert-bar').innerText = "SYSTEM NOMINAL";
+            document.getElementById('alert-bar').className = "mt-4 text-[10px] text-green-500 font-bold flex items-center gap-2";
+            sim.history.push("✅ Shift covered via overtime protocol.");
+            logAction("Coverage restored at ER Entrance.");
+            setTimeout(finishSim, 2000);
+        }
+
+        function finishSim() {
+            document.getElementById('score-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = sim.score + "%";
+            document.getElementById('final-rank').innerText = sim.score > 80 ? "🔥 ELITE OPERATOR" : "⚠️ NEED IMPROVEMENT";
+            const fl = document.getElementById('feedback-list');
+            sim.history.forEach(h => {
+                let p = document.createElement('p');
+                p.innerText = h;
+                fl.appendChild(p);
+            });
         }
 
         function nav(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('view-' + id).classList.add('active');
+            document.getElementById('nav-' + id).classList.add('active');
         }
-
-        function closeModal() { document.getElementById('sim-modal').style.display = 'none'; }
     </script>
 </body>
 </html>
