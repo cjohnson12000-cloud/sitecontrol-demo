@@ -1,260 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiteControl | Operational Simulation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root { --accent: #f59e0b; --bg: #000; --card: #111; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .ops-card { background: var(--card); border: 1px solid #222; border-radius: 1rem; }
-        .screen { display: none; height: calc(100vh - 140px); overflow-y: auto; padding: 1.25rem; }
-        .screen.active { display: block; }
-        .nav-btn { font-size: 0.7rem; font-weight: 800; color: #555; text-transform: uppercase; transition: 0.2s; }
-        .nav-btn.active { color: var(--accent); }
-        .btn-action { background: #222; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-align: left; }
-        .btn-action:hover { background: #333; border-color: var(--accent); }
-        .status-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-    </style>
+<title>SiteControl Live Ops</title>
+
+<style>
+body {
+  background:#0b0f1a;
+  color:white;
+  font-family:Arial;
+  margin:0;
+  text-align:center;
+}
+
+.screen { display:none; padding:20px; }
+.on { display:block; }
+
+button {
+  width:90%;
+  margin:10px auto;
+  padding:15px;
+  font-size:18px;
+  background:orange;
+  border:none;
+  border-radius:8px;
+}
+
+.nav {
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:#111;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+}
+
+.nav button {
+  width:auto;
+  font-size:12px;
+  padding:10px;
+}
+
+.card {
+  background:#1a1f2e;
+  margin:10px;
+  padding:15px;
+  border-radius:10px;
+}
+
+.alert {
+  background:red;
+  padding:10px;
+  margin:10px;
+  border-radius:8px;
+}
+</style>
 </head>
-<body class="flex flex-col h-screen">
 
-    <section id="login-screen" class="fixed inset-0 z-[300] bg-black flex items-center justify-center p-6">
-        <div class="ops-card p-8 w-full max-w-sm border-orange-500/30">
-            <div class="mb-6 text-center">
-                <div class="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 font-black text-black text-2xl">SC</div>
-                <h1 class="text-2xl font-bold">SiteControl Ops</h1>
-                <p class="text-zinc-500 text-xs mt-1">Operational Environment v1.0</p>
-            </div>
-            <div class="space-y-4">
-                <input type="text" id="user-name" placeholder="Enter Name" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl outline-none focus:border-orange-500 text-sm">
-                <select id="user-role" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl outline-none text-sm">
-                    <option value="Manager">Manager (Strategic)</option>
-                    <option value="Supervisor">Supervisor (Tactical)</option>
-                    <option value="Officer">Officer (Operations)</option>
-                    <option value="Client">Client (Oversight)</option>
-                </select>
-                <button onclick="startSim()" class="w-full bg-orange-500 text-black py-4 rounded-xl font-black uppercase tracking-widest hover:bg-orange-400 transition">Initialize</button>
-            </div>
-        </div>
-    </section>
+<body>
 
-    <header class="h-16 flex items-center justify-between px-6 border-b border-zinc-900 shrink-0 bg-black">
-        <div>
-            <p id="display-role" class="text-[10px] font-black text-orange-500 uppercase tracking-widest">OFFICER DASHBOARD</p>
-            <h2 id="site-title" class="text-lg font-bold">Harbor Point Tower</h2>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="text-right">
-                <p id="clock" class="text-sm font-mono leading-none">08:00 AM</p>
-                <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-tighter">Live Ops</p>
-            </div>
-            <div id="initials-box" class="h-10 w-10 bg-zinc-800 rounded-full flex items-center justify-center font-bold text-sm border border-zinc-700">CJ</div>
-        </div>
-    </header>
+<!-- LOGIN -->
+<section id="login" class="screen on">
+<h2>SiteControl Demo</h2>
 
-    <main class="flex-1 relative">
-        <div id="view-dash" class="screen active">
-            <div class="ops-card p-6 mb-4">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="text-zinc-500 text-[10px] font-black uppercase">Readiness</h3>
-                        <p id="readiness-val" class="text-5xl font-black">100%</p>
-                    </div>
-                    <div id="coverage-ring" class="w-16 h-16 rounded-full border-4 border-green-500 flex items-center justify-center">
-                        <span class="text-[10px] font-bold">OK</span>
-                    </div>
-                </div>
-                <div id="alert-bar" class="mt-4 text-[10px] text-green-500 font-bold flex items-center gap-2">
-                    <span class="h-2 w-2 bg-green-500 rounded-full status-pulse"></span> SYSTEM NOMINAL
-                </div>
-            </div>
+<input id="name" placeholder="Enter Name" style="padding:10px;width:80%"><br><br>
 
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="ops-card p-4"><p id="task-stat" class="text-2xl font-bold">0/4</p><p class="text-[10px] text-zinc-500 font-bold uppercase">Tasks</p></div>
-                <div class="ops-card p-4"><p id="stat-sites" class="text-2xl font-bold">3</p><p class="text-[10px] text-zinc-500 font-bold uppercase">Sites</p></div>
-            </div>
+<select id="role" style="padding:10px;width:80%">
+<option>Manager</option>
+<option>Supervisor</option>
+<option>Client</option>
+<option>Officer</option>
+</select>
 
-            <h3 class="font-black text-sm uppercase mb-4 tracking-tighter">Priority Incident Log</h3>
-            <div id="log-container" class="space-y-2">
-                <div class="text-[10px] font-mono text-zinc-600 italic">> Awaiting operational data...</div>
-            </div>
-        </div>
+<br><br>
+<button onclick="start()">Start Demo</button>
+</section>
 
-        <div id="view-sched" class="screen">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black">Staffing Matrix</h2>
-                <span id="sched-status" class="status-badge bg-green-900/30 text-green-400 text-[10px] px-2 py-1 rounded">Fully Staffed</span>
-            </div>
-            <div id="uncovered-card" class="hidden ops-card p-4 border-l-4 border-orange-500 mb-4">
-                <p class="text-xs font-bold text-orange-500">Staffing Gap Detected</p>
-                <p class="text-lg font-black mb-3" id="gap-site">ER Entrance (10PM-6AM)</p>
-                <button onclick="resolveStaffing()" class="w-full bg-white text-black font-black py-3 rounded-lg text-xs uppercase">Assign Replacement (OT)</button>
-            </div>
-            <div id="roster" class="space-y-2 opacity-50">
-                <div class="ops-card p-3 text-xs flex justify-between"><span>North Gate</span><span class="text-green-500">M. Reyes</span></div>
-                <div class="ops-card p-3 text-xs flex justify-between"><span>Lobby Desk</span><span class="text-green-500">A. Stone</span></div>
-            </div>
-        </div>
+<!-- DASHBOARD -->
+<section id="dash" class="screen">
+<h2>Dashboard</h2>
+<div id="alerts"></div>
 
-        <div id="view-msgs" class="screen">
-            <div class="flex gap-2 mb-4">
-                <button onclick="switchThread('Internal')" id="t-int" class="text-[10px] font-bold px-3 py-1 bg-zinc-800 rounded-full text-orange-500">Internal</button>
-                <button onclick="switchThread('Client')" id="t-cli" class="text-[10px] font-bold px-3 py-1 bg-zinc-900 rounded-full text-zinc-500">Client</button>
-            </div>
-            <div id="msg-box" class="space-y-4 font-medium text-sm">
-                <div class="text-center text-zinc-700 text-[10px] italic">Live thread established...</div>
-            </div>
-        </div>
+<div class="card">Coverage: <span id="coverage">92%</span></div>
+<div class="card">Active Alerts: <span id="alertCount">0</span></div>
+<div class="card">Sites: 4 Active</div>
+</section>
 
-        <div id="scen-modal" class="fixed inset-0 z-[400] bg-black/95 hidden items-center justify-center p-6 text-center">
-            <div class="ops-card p-8 border-orange-500 border-2 w-full max-w-sm">
-                <p id="scen-time" class="text-orange-500 font-mono text-xs mb-1">08:00 AM</p>
-                <h2 id="scen-title" class="text-2xl font-black italic mb-2 tracking-tighter">ALERT</h2>
-                <p id="scen-desc" class="mb-6 text-zinc-400 text-sm leading-relaxed">Officer is late for shift.</p>
-                <div id="scen-opts" class="flex flex-col gap-2"></div>
-            </div>
-        </div>
+<!-- SCHEDULE -->
+<section id="schedule" class="screen">
+<h2>Schedule</h2>
 
-        <div id="score-screen" class="fixed inset-0 z-[500] bg-black hidden flex-col items-center justify-center p-8 text-center">
-            <h1 class="text-orange-500 font-black italic text-4xl mb-2">OPERATIONAL REVIEW</h1>
-            <p id="final-rank" class="text-2xl font-bold mb-4">ELITE OPERATOR</p>
-            <div id="final-score" class="text-7xl font-black mb-8">100%</div>
-            <div id="feedback-list" class="text-left text-sm text-zinc-500 space-y-2 mb-10 max-w-xs"></div>
-            <div class="border-t border-zinc-800 pt-6 w-full max-w-xs">
-                <p class="text-xs text-zinc-600 mb-1">Developed from field experience by</p>
-                <p class="font-bold text-lg">Cory Johnson</p>
-                <p class="text-orange-500 text-[10px] font-bold uppercase tracking-widest">Operations & Security Management</p>
-                <a href="https://linkedin.com" class="inline-block mt-6 bg-[#0077b5] text-white px-6 py-2 rounded-full font-bold text-xs">LinkedIn Profile</a>
-            </div>
-        </div>
-    </main>
+<div class="card">
+Harbor Point - Front Desk ❌ OPEN  
+<button onclick="fillPost()">Fill Post</button>
+</div>
 
-    <footer class="h-16 border-t border-zinc-900 flex justify-around items-center bg-black shrink-0">
-        <button onclick="nav('dash')" id="nav-dash" class="nav-btn active">Dashboard</button>
-        <button onclick="nav('sched')" id="nav-sched" class="nav-btn">Schedule</button>
-        <button onclick="nav('msgs')" id="nav-msgs" class="nav-btn">Messages</button>
-    </footer >
+<div class="card">
+West Tower - Patrol ✅ Covered
+</div>
+</section>
 
-    <script>
-        let sim = { 
-            name: '', role: '', score: 100, step: 0, time: 480, 
-            history: [], activeThread: 'Internal', notified: false 
-        };
+<!-- MESSAGES -->
+<section id="messages" class="screen">
+<h2>Messages</h2>
 
-        const scenarioList = [
-            { 
-                time: 485, role: 'Manager', title: "OFFICER LATE", desc: "Front Desk officer is late for 08:00 start.", 
-                opts: [
-                    { t: "Pull 10AM Officer Early", c: true, f: "Coverage maintained." },
-                    { t: "Wait for late officer", c: false, f: "Safety gap created at Lobby." }
-                ] 
-            },
-            { 
-                time: 500, role: 'Manager', title: "CLIENT UPDATE", desc: "Client: 'Deliveries moved to 5PM.'", 
-                opts: [
-                    { t: "Confirm & Notify Client", c: true, f: "Communication loop closed." },
-                    { t: "Update Logs Only", c: false, f: "Client notification missed." }
-                ] 
-            },
-            { 
-                time: 520, role: 'Manager', title: "CALL-OFF ALERT", desc: "Main Entry uncovered (10PM-6AM).", 
-                type: 'staffing'
-            }
-        ];
+<div class="card">
+Officer: "Running late"
+</div>
 
-        function startSim() {
-            sim.name = document.getElementById('user-name').value || "Operator";
-            sim.role = document.getElementById('user-role').value;
-            document.getElementById('display-role').innerText = sim.role.toUpperCase() + " DASHBOARD";
-            document.getElementById('initials-box').innerText = sim.name.split(' ').map(n=>n[0]).join('');
-            document.getElementById('login-screen').style.display = 'none';
-            setInterval(tick, 1000);
-        }
+<div class="card">
+Supervisor: "Cover post ASAP"
+</div>
+</section>
 
-        function tick() {
-            sim.time += 1;
-            let h = Math.floor(sim.time / 60);
-            let m = sim.time % 60;
-            document.getElementById('clock').innerText = `${h}:${m < 10 ? '0'+m : m} AM`;
-            
-            let ev = scenarioList.find(e => e.time === sim.time);
-            if (ev) triggerScenario(ev);
-        }
+<!-- REPORTS -->
+<section id="reports" class="screen">
+<h2>Reports</h2>
 
-        function triggerScenario(ev) {
-            if (ev.type === 'staffing') {
-                document.getElementById('uncovered-card').classList.remove('hidden');
-                document.getElementById('readiness-val').innerText = "67%";
-                document.getElementById('coverage-ring').style.borderColor = "#f59e0b";
-                document.getElementById('alert-bar').innerHTML = '<span class="h-2 w-2 bg-orange-500 rounded-full status-pulse"></span> STAFFING GAP';
-                document.getElementById('alert-bar').className = "mt-4 text-[10px] text-orange-500 font-bold flex items-center gap-2";
-                return;
-            }
-            const m = document.getElementById('scen-modal');
-            m.style.display = 'flex';
-            document.getElementById('scen-title').innerText = ev.title;
-            document.getElementById('scen-desc').innerText = ev.desc;
-            document.getElementById('scen-time').innerText = document.getElementById('clock').innerText;
-            
-            const optBox = document.getElementById('scen-opts');
-            optBox.innerHTML = '';
-            ev.opts.forEach(o => {
-                let b = document.createElement('button');
-                b.className = "bg-zinc-800 p-4 rounded-xl text-xs font-bold hover:bg-orange-500 hover:text-black transition";
-                b.innerText = o.t;
-                b.onclick = () => makeChoice(o);
-                optBox.appendChild(b);
-            });
-        }
+<div class="card">
+Incident Report - OPEN  
+<button onclick="closeReport()">Close</button>
+</div>
+</section>
 
-        function makeChoice(o) {
-            if (!o.c) { sim.score -= 15; sim.history.push("⚠️ " + o.f); }
-            else { sim.history.push("✅ " + o.f); }
-            document.getElementById('scen-modal').style.display = 'none';
-            logAction(o.f);
-            if (sim.history.length >= 3) finishSim();
-        }
+<!-- MORE -->
+<section id="more" class="screen">
+<h2>Operations Tools</h2>
 
-        function logAction(msg) {
-            const l = document.getElementById('log-container');
-            let d = document.createElement('div');
-            d.className = "text-[10px] font-mono text-zinc-400";
-            d.innerText = `> ${msg}`;
-            l.prepend(d);
-        }
+<div class="card">📍 Map Tracking (simulated)</div>
+<div class="card">📊 Performance Score: <span id="score">75</span>/100</div>
 
-        function resolveStaffing() {
-            document.getElementById('uncovered-card').classList.add('hidden');
-            document.getElementById('readiness-val').innerText = "100%";
-            document.getElementById('coverage-ring').style.borderColor = "#22c55e";
-            document.getElementById('alert-bar').innerText = "SYSTEM NOMINAL";
-            document.getElementById('alert-bar').className = "mt-4 text-[10px] text-green-500 font-bold flex items-center gap-2";
-            sim.history.push("✅ Shift covered via overtime protocol.");
-            logAction("Coverage restored at ER Entrance.");
-            setTimeout(finishSim, 2000);
-        }
+<button onclick="finish()">Finish Demo</button>
+</section>
 
-        function finishSim() {
-            document.getElementById('score-screen').classList.remove('hidden');
-            document.getElementById('final-score').innerText = sim.score + "%";
-            document.getElementById('final-rank').innerText = sim.score > 80 ? "🔥 ELITE OPERATOR" : "⚠️ NEED IMPROVEMENT";
-            const fl = document.getElementById('feedback-list');
-            sim.history.forEach(h => {
-                let p = document.createElement('p');
-                p.innerText = h;
-                fl.appendChild(p);
-            });
-        }
+<!-- REVIEW -->
+<section id="review" class="screen">
+<h2>Performance Review</h2>
 
-        function nav(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            document.getElementById('nav-' + id).classList.add('active');
-        }
-    </script>
+<div class="card">Score: <span id="finalScore"></span>/100</div>
+<div class="card">Strength: Quick Response</div>
+<div class="card">Improvement: Staffing Decisions</div>
+
+<h3>Built by Cory Johnson</h3>
+</section>
+
+<!-- NAV -->
+<div class="nav">
+<button onclick="show('dash')">Dashboard</button>
+<button onclick="show('schedule')">Schedule</button>
+<button onclick="show('messages')">Messages</button>
+<button onclick="show('reports')">Reports</button>
+<button onclick="show('more')">More</button>
+</div>
+
+<script>
+
+let alerts = 0;
+let score = 75;
+
+function start(){
+  show('dash');
+  setInterval(fakeAlert,4000);
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+function fakeAlert(){
+  alerts++;
+  document.getElementById("alertCount").innerText = alerts;
+
+  let box = document.getElementById("alerts");
+  box.innerHTML += "<div class='alert'>🚨 Officer call-off - NEED COVERAGE</div>";
+
+  score -= 2;
+}
+
+function fillPost(){
+  alert("Post Filled");
+  score += 10;
+}
+
+function closeReport(){
+  alert("Report Closed");
+  score += 5;
+}
+
+function finish(){
+  show('review');
+  document.getElementById("finalScore").innerText = score;
+}
+
+</script>
+
 </body>
 </html>
