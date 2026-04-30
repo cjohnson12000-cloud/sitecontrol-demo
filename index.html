@@ -1,159 +1,174 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>SiteControl Live Ops</title>
-
-<style>
-body {
-  background:#0b0f1a;
-  color:white;
-  font-family:Arial;
-  text-align:center;
-  padding:20px;
-}
-
-button {
-  display:block;
-  width:90%;
-  margin:10px auto;
-  padding:15px;
-  font-size:18px;
-  background:orange;
-  border:none;
-  border-radius:8px;
-}
-
-.hidden { display:none; }
-
-.alert {
-  background:red;
-  padding:10px;
-  margin:10px;
-  border-radius:6px;
-  animation:flash 1s infinite;
-}
-
-@keyframes flash {
-  0%{opacity:1;}
-  50%{opacity:.5;}
-  100%{opacity:1;}
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiteControl | Operational Environment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --accent: #3b82f6; --bg: #000000; --card: #111111; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .ops-card { background: var(--card); border: 1px solid #222; border-radius: 1.25rem; transition: transform 0.2s; }
+        .screen { display: none; height: calc(100vh - 128px); overflow-y: auto; padding: 1.5rem; }
+        .screen.active { display: block; }
+        .progress-circle { background: conic-gradient(var(--accent) var(--p), #222 0); border-radius: 50%; }
+        .msg-bubble { max-width: 85%; padding: 0.75rem 1rem; border-radius: 1rem; font-size: 0.875rem; }
+        @property --p { syntax: '<number>'; inherits: false; initial-value: 0; }
+    </style>
 </head>
+<body class="flex flex-col h-screen">
 
-<body>
+    <section id="login" class="fixed inset-0 z-[100] bg-black flex items-center justify-center p-6">
+        <div class="ops-card p-8 w-full max-w-sm">
+            <div class="mb-8 text-center">
+                <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 font-bold text-xl">SC</div>
+                <h1 class="text-2xl font-bold">Terminal Login</h1>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="user-name" placeholder="Full Name" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl outline-none focus:border-blue-500">
+                <select id="user-role" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl outline-none">
+                    <option value="Manager">Manager</option>
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Client">Client</option>
+                </select>
+                <button onclick="initSim()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-500 transition">Open Console</button>
+            </div>
+        </div>
+    </section>
 
-<h1>LIVE OPERATIONS SIMULATION</h1>
-<h2>SiteControl</h2>
-<p>NOT A GAME — Real Ops Decision System</p>
+    <header class="h-16 flex items-center justify-between px-6 border-b border-zinc-800 shrink-0">
+        <div>
+            <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-tighter">SiteControl Ops</h2>
+            <p id="site-name" class="font-bold">Harbor Point Tower</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right"><p id="timer" class="text-sm font-mono">10:00 AM</p></div>
+            <div id="u-initials" class="h-10 w-10 bg-zinc-800 rounded-full flex items-center justify-center font-bold text-sm">CJ</div>
+        </div>
+    </header>
 
-<input id="name" placeholder="Enter your name" style="padding:10px; width:80%;"/>
+    <main class="flex-1">
+        <div id="view-dash" class="screen active">
+            <div class="ops-card p-6 mb-6 flex justify-between items-center">
+                <div>
+                    <h3 class="text-zinc-500 text-xs font-bold uppercase">Today's Readiness</h3>
+                    <p id="readiness-val" class="text-4xl font-bold mt-1">0%</p>
+                    <span id="risk-status" class="text-[10px] bg-red-900/40 text-red-400 px-2 py-0.5 rounded-full">1 risk item</span>
+                </div>
+                <div id="circle-ui" class="w-20 h-20 progress-circle flex items-center justify-center" style="--p: 0">
+                    <div class="w-16 h-16 bg-black rounded-full"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="ops-card p-4"><p class="text-2xl font-bold" id="task-stat">0/4</p><p class="text-[10px] text-zinc-500 uppercase">Tasks</p></div>
+                <div class="ops-card p-4"><p class="text-2xl font-bold text-green-500" id="coverage-stat">100%</p><p class="text-[10px] text-zinc-500 uppercase">Coverage</p></div>
+            </div>
 
-<h3>Select Role</h3>
-<button onclick="start('Manager')">Manager</button>
-<button onclick="start('Supervisor')">Supervisor</button>
-<button onclick="start('Officer')">Officer</button>
-<button onclick="start('Client')">Client</button>
+            <h3 class="font-bold mb-4">Priority Checklist</h3>
+            <div id="checklist" class="space-y-3">
+                </div>
+        </div>
 
-<div id="dashboard" class="hidden">
-  <h2 id="title"></h2>
+        <div id="view-sched" class="screen">
+            <h2 class="text-xl font-bold mb-6">Security Staffing</h2>
+            <div id="uncovered-alert" class="hidden bg-red-900/20 border border-red-900/50 p-4 rounded-xl mb-6">
+                <p class="text-red-400 font-bold">🚨 1 UNCOVERED POST</p>
+                <p class="text-xs text-red-300/70">Officer call-off reported at ER Entrance.</p>
+            </div>
+            <div class="ops-card p-6 space-y-4">
+                <h3 class="text-sm font-bold text-zinc-400">Manual Assignment</h3>
+                <input type="text" placeholder="Shift: ER Entrance" class="w-full bg-zinc-900 p-3 rounded-lg border border-zinc-800" readonly>
+                <button onclick="fixStaffing()" class="w-full bg-zinc-100 text-black font-bold py-3 rounded-lg">Assign Officer Johnson (OT)</button>
+            </div>
+        </div>
 
-  <div id="alerts"></div>
+        <div id="view-msgs" class="screen">
+            <div id="msg-container" class="space-y-4">
+                <div class="flex flex-col items-start">
+                    <div class="msg-bubble bg-zinc-800 text-zinc-300">L. Chen: Panel room is ready for inspection after lunch.</div>
+                    <span class="text-[10px] text-zinc-600 mt-1">08:05 AM</span>
+                </div>
+            </div>
+        </div>
+    </main>
 
-  <p id="scenarioText"></p>
+    <nav class="h-16 border-t border-zinc-800 flex justify-around items-center bg-black shrink-0">
+        <button onclick="nav('dash')" class="text-blue-500 text-xs font-bold">Dashboard</button>
+        <button onclick="nav('sched')" class="text-zinc-500 text-xs font-bold">Schedule</button>
+        <button onclick="nav('msgs')" class="text-zinc-500 text-xs font-bold">Messages</button>
+    </nav>
 
-  <button onclick="decision(0)">Ignore situation</button>
-  <button onclick="decision(1)">Call backup</button>
-  <button onclick="decision(2)">Cover post yourself</button>
-</div>
+    <div id="sim-modal" class="fixed inset-0 z-[200] bg-black/90 hidden items-center justify-center p-6 text-center">
+        <div class="ops-card p-8 border-red-600 border-2 max-w-sm">
+            <h2 id="sim-title" class="text-2xl font-black italic text-red-500 mb-2 underline">CALL-OFF ALERT</h2>
+            <p id="sim-desc" class="mb-6 text-zinc-300">A client update was received but not confirmed. The site coverage is dropping.</p>
+            <button onclick="closeModal()" class="w-full bg-red-600 py-3 rounded-xl font-bold">Acknowledge & Respond</button>
+        </div>
+    </div>
 
-<div id="result" class="hidden">
-  <h2>FINAL PERFORMANCE</h2>
-  <p id="scoreText"></p>
-</div>
+    <script>
+        let simData = { score: 100, completed: 0, time: "10:00 AM", mistakes: [] };
+        const tasks = [
+            { id: 1, text: "North gate safety walk", sub: "Access · M. Reyes · 08:30" },
+            { id: 2, text: "Crane lift exclusion zone", sub: "Deck B · A. Stone · 10:00" },
+            { id: 3, text: "Concrete delivery signoff", sub: "Floor 4 · J. Patel · 12:15" },
+            { id: 4, text: "Electrical rough-in check", sub: "Level 3 · L. Chen · 15:00" }
+        ];
 
-<script>
-let score = 0;
-let step = 0;
+        function initSim() {
+            const name = document.getElementById('user-name').value || "Cory Johnson";
+            document.getElementById('u-initials').innerText = name.split(' ').map(n=>n[0]).join('');
+            document.getElementById('login').style.display = 'none';
+            renderChecklist();
+            
+            // Scenario 1: Automatic Call-off after 5 seconds
+            setTimeout(() => {
+                document.getElementById('sim-modal').style.display = 'flex';
+                document.getElementById('uncovered-alert').classList.remove('hidden');
+                document.getElementById('coverage-stat').innerText = "67%";
+                document.getElementById('coverage-stat').classList.replace('text-green-500', 'text-red-500');
+            }, 5000);
+        }
 
-let scenarios = [
-  "🚨 2 Officers called off. No coverage.",
-  "🚨 Client complaining about response delay.",
-  "🚨 Suspicious person reported inside building.",
-  "🚨 Emergency alarm triggered — unknown cause."
-];
+        function renderChecklist() {
+            const container = document.getElementById('checklist');
+            tasks.forEach(t => {
+                const item = document.createElement('div');
+                item.className = "ops-card p-4 flex items-center gap-4 cursor-pointer";
+                item.innerHTML = `
+                    <input type="checkbox" onchange="taskUpdate(this)" class="w-6 h-6 rounded-full border-zinc-700 bg-transparent text-blue-500">
+                    <div><p class="text-sm font-bold">${t.text}</p><p class="text-[10px] text-zinc-500">${t.sub}</p></div>
+                `;
+                container.appendChild(item);
+            });
+        }
 
-function start(role){
-  let name = document.getElementById("name").value || "Operator";
+        function taskUpdate(cb) {
+            simData.completed += cb.checked ? 1 : -1;
+            const pct = (simData.completed / 4) * 100;
+            document.getElementById('readiness-val').innerText = pct + "%";
+            document.getElementById('task-stat').innerText = simData.completed + "/4";
+            document.getElementById('circle-ui').style.setProperty('--p', pct + "%");
+            if(pct === 100) {
+                document.getElementById('risk-status').innerText = "On Track";
+                document.getElementById('risk-status').className = "text-[10px] bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full";
+            }
+        }
 
-  document.getElementById("title").innerText =
-    role + " " + name + " — LIVE DASHBOARD";
+        function fixStaffing() {
+            document.getElementById('uncovered-alert').innerHTML = "<p class='text-green-400 font-bold'>✓ POST COVERED</p>";
+            document.getElementById('coverage-stat').innerText = "100%";
+            document.getElementById('coverage-stat').classList.replace('text-red-500', 'text-green-500');
+            alert("Staffing updated. Logic applied: Officer Johnson moved to OT.");
+        }
 
-  document.getElementById("dashboard").classList.remove("hidden");
+        function nav(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+        }
 
-  nextScenario();
-
-  setInterval(randomAlert, 4000);
-}
-
-function randomAlert(){
-  let alertBox = document.getElementById("alerts");
-  let alert = document.createElement("div");
-  alert.className = "alert";
-  alert.innerText = "⚠️ DISPATCH: New activity detected";
-  alertBox.prepend(alert);
-
-  setTimeout(()=>{ alert.remove(); },3000);
-}
-
-function nextScenario(){
-  if(step >= scenarios.length){
-    endSimulation();
-    return;
-  }
-
-  document.getElementById("scenarioText").innerText =
-    scenarios[step];
-}
-
-function decision(choice){
-  if(choice === 2){
-    score += 3;
-  }
-  else if(choice === 1){
-    score += 2;
-  }
-  else{
-    score += 1;
-  }
-
-  step++;
-  nextScenario();
-}
-
-function endSimulation(){
-  document.getElementById("dashboard").classList.add("hidden");
-  document.getElementById("result").classList.remove("hidden");
-
-  let rating = Math.min(10, score);
-
-  let message = "";
-
-  if(rating >= 8){
-    message = "🔥 ELITE OPERATOR — Strong leadership decisions";
-  }
-  else if(rating >= 5){
-    message = "⚠️ MID LEVEL — Good but needs improvement";
-  }
-  else{
-    message = "❌ HIGH RISK — Poor operational decisions";
-  }
-
-  document.getElementById("scoreText").innerText =
-    "Score: " + rating + "/10\n" + message;
-}
-</script>
-
+        function closeModal() { document.getElementById('sim-modal').style.display = 'none'; }
+    </script>
 </body>
 </html>
