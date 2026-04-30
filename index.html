@@ -1,52 +1,159 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SiteControl Full Demo</title>
+<!DOCTYPE html>
+<html>
+<head>
+<title>SiteControl Live Ops</title>
+
 <style>
-body{margin:0;background:#05070A;color:#F9FAFB;font-family:Arial,system-ui,sans-serif}.app{max-width:430px;margin:auto;min-height:100vh;background:linear-gradient(#07101d,#05070A);padding-bottom:82px}.screen{display:none;padding:22px 18px 105px}.on{display:block}.top{display:none;position:sticky;top:0;z-index:4;background:#05070A;border-bottom:1px solid #222;padding:10px 16px;justify-content:space-between}.top.on{display:flex}.badge{background:#EF4444;color:white;border-radius:999px;padding:4px 9px;font-weight:900;font-size:12px}.nav{display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);background:#05070A;border-top:1px solid #222;padding:8px 4px;justify-content:space-around}.nav.on{display:flex}.tab{background:0;border:0;color:#A7B0C5;font-weight:900;font-size:11px}.tab.active{color:#FFB020}.tab b{display:block;font-size:23px}.k{color:#FFB020;font-size:12px;font-weight:900;letter-spacing:2px;text-transform:uppercase}h1{font-size:38px;line-height:1.05;margin:8px 0 14px}.sub{color:#A7B0C5;font-weight:700;line-height:1.42}.card{background:#0B0F14;border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:16px;margin:12px 0}.hero{background:#10243E;border-radius:28px;padding:20px;margin:14px 0}.big{font-size:54px;font-weight:900}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric{background:#0B0F14;border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:16px;min-height:115px;display:flex;flex-direction:column;justify-content:flex-end}.metric strong{font-size:32px}.metric span{color:#A7B0C5;font-weight:800}.btn{width:100%;border:0;border-radius:15px;padding:13px;margin-top:10px;background:#FFB020;color:#05070A;font-weight:900}.dark{background:#111827!important;color:#F9FAFB!important;border:1px solid rgba(255,255,255,.1)!important}.redb{background:rgba(239,68,68,.18)!important;color:#EF4444!important;border:1px solid rgba(239,68,68,.35)!important}.greenb{background:rgba(34,197,94,.18)!important;color:#22C55E!important;border:1px solid rgba(34,197,94,.35)!important}input,select,textarea{width:100%;background:#111827;border:1px solid rgba(255,255,255,.1);border-radius:16px;color:white;padding:13px;margin:7px 0 10px;box-sizing:border-box}.label{color:#A7B0C5;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1.4px;margin-top:10px}.item{background:#111827;border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:14px;margin:9px 0}.it{font-weight:900}.is{color:#A7B0C5;font-size:13px;font-weight:700;margin-top:4px}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.pill{border-radius:999px;padding:6px 10px;font-size:11px;font-weight:900}.green{color:#22C55E}.red{color:#EF4444}.gold{color:#FFB020}.blue{color:#3B82F6}.wrap{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid rgba(255,255,255,.1);background:#111827;color:#A7B0C5;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:900}.chip.on{background:#FFB020;color:#05070A}.toast{display:none;position:fixed;z-index:20;top:12px;left:50%;transform:translateX(-50%);width:min(392px,92%);background:#111827;border:1px solid rgba(255,176,32,.35);border-radius:18px;padding:12px}.toast.on{display:block}.toast b{color:#FFB020}.toast p{margin:4px 0 0;color:#D7DEE9;font-size:13px}.bubble{border-radius:22px;padding:13px 14px;margin:10px 0;max-width:88%;background:#FFF8ED;color:#0F172A}.bubble.mine{margin-left:auto;background:#10243E;color:#F9FAFB}.bubble small{display:block;font-weight:900;color:#C75B43;margin-bottom:5px}.map{height:230px;border-radius:22px;background:linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),#0B0F14;background-size:42px 42px;border:1px solid #222;position:relative}.pin{position:absolute;width:16px;height:16px;border-radius:50%;border:3px solid white;background:#22C55E;box-shadow:0 0 0 6px rgba(34,197,94,.15)}.pin.red{background:#EF4444}.pin.gold{background:#FFB020}.pin.blue{background:#3B82F6}.score{font-size:64px;font-weight:900;color:#FFB020}
-</style></head><body>
-<div class="toast" id="toast"><b id="toastTitle"></b><p id="toastBody"></p></div><div class="app"><div class="top" id="top"><b>SiteControl Demo</b><span class="badge" id="badge">0 alerts</span></div>
-<section id="login" class="screen on"><div class="k">Live Operations Simulation</div><h1>SiteControl</h1><p class="sub">This platform was built from real-world experience in security and operations management. It is designed to simplify daily operations, improve communication, and support both the institution and the people it serves.</p><div class="hero"><div class="k">Not a Game</div><div class="big">Real Ops</div><p class="sub">This demo tests how you manage staffing, client updates, assistance requests, reports, and communication under pressure.</p></div><div class="card"><div class="label">Your name</div><input id="visitorName" placeholder="Enter your name" value="Mary"><div class="label">Choose role</div><select id="visitorRole"><option>Manager</option><option>Client</option><option>Supervisor</option><option>Officer</option></select><button class="btn" onclick="startDemo()">Start Live Demo</button></div><div class="card"><b>Built by Cory Johnson</b><p class="sub">Operations & Security Management · Chicago, IL</p></div></section>
-<section id="dash" class="screen"><div class="k" id="roleHeader">Manager Dashboard</div><h1 id="welcome">Welcome</h1><p class="sub" id="dashSub">3 sites under your control · real-time command center</p><div class="grid"><div class="metric"><strong id="siteCount">3</strong><span>Sites</span></div><div class="metric"><strong id="coverage">92%</strong><span>Coverage</span></div><div class="metric"><strong id="alertCount">0</strong><span>Active Alerts</span></div><div class="metric"><strong id="reportCount">0</strong><span>Reports</span></div></div><div class="card" id="managerControls"><b>Live Scenario Controls</b><button class="btn" onclick="clientDelivery()">Client delivery change</button><button class="btn dark" onclick="lateOfficer()">8 AM officer late</button><button class="btn redb" onclick="nightCalloff()">Night shift call-off</button><button class="btn dark" onclick="assistance()">Officer needs assistance</button><button class="btn dark" onclick="adminSite()">Admin requests new site</button><button class="btn greenb" onclick="show('review')">Finish Demo / Skills Review</button></div><div class="card" id="clientControls" style="display:none"><b>Client Actions</b><button class="btn" onclick="clientDelivery()">Send delivery update</button><button class="btn dark" onclick="clientIssue()">Submit service concern</button><button class="btn dark" onclick="clientFile()">Upload emergency protocol / blueprint</button><button class="btn greenb" onclick="show('review')">Finish Client Review</button></div><div class="card"><b>Live Feed</b><div id="feed"></div></div></section>
-<section id="schedule" class="screen"><div class="k">Schedule Board</div><h1>Today / Week</h1><div class="card"><b>Available Extra Officers</b><div id="available"></div></div><div id="scheduleList"></div></section>
-<section id="messages" class="screen"><div class="k">Messages</div><h1>Threads</h1><div id="threads"></div><div id="threadView"></div></section>
-<section id="reports" class="screen"><div class="k">Reports</div><h1>Review Center</h1><div id="reportsList"></div></section>
-<section id="sites" class="screen"><div class="k">Sites</div><h1>Site Map</h1><div class="card"><b>Harbor Point Tower</b><div class="map"><span class="pin" style="left:22%;top:35%"></span><span class="pin gold" style="left:55%;top:58%"></span><span class="pin red" style="left:78%;top:42%"></span><span class="pin blue" style="left:42%;top:70%"></span></div><p class="sub">Green: officer posted · Gold: delivery/task zone · Red: alert/uncovered · Blue: supervisor response</p></div><div class="card"><b>Add New Site</b><input id="newSite" placeholder="Site name"><textarea id="newInfo" placeholder="Site notes / post orders"></textarea><button class="btn" onclick="addNewSite()">Create Site + Assign Officers</button></div></section>
-<section id="admin" class="screen"><div class="k">Manager Tools</div><h1>Control</h1><div class="card"><b>Create Officer Task</b><input id="taskText" placeholder="Task / briefing"><input id="taskLoc" placeholder="Location"><div class="wrap" id="taskOfficers"></div><button class="btn" onclick="createTask()">Send Task Notification</button></div><div class="card"><b>Delivery Confirmation</b><p class="sub">The client delivery change does not move forward until the manager confirms the time and notifies the client.</p><button class="btn" onclick="confirmDelivery()">Confirm 5:00 PM Delivery + Notify Client</button></div></section>
-<section id="review" class="screen"><div class="k">Security Operations Demo Review</div><h1>Skills Rating</h1><div class="card"><div class="score" id="score">86%</div><p class="sub">Your operations score is based on coverage, communication, report handling, client follow-up, and incident response.</p></div><div class="card"><b>Strengths</b><div id="strengthsBox"></div></div><div class="card"><b>Missed Warnings / Coaching Notes</b><div id="warningsBox"></div></div><div class="card"><b>About This Demo</b><p class="sub">He understands operations and built this from real experience.</p><p class="sub">SiteControl was developed to solve real challenges in staffing, communication, and incident response across multiple sites. This demo reflects real-world scenarios — not a game — and shows how operations can be managed more efficiently in the field.</p><p class="sub"><b>Built by Cory Johnson</b><br>Operations & Security Management<br>Chicago, IL</p><button class="btn" onclick="openFeedback()">Submit Security Operations Demo Review</button><button class="btn dark" onclick="window.open('https://www.linkedin.com/in/cory-johnson-ops?utm_source=share_via&utm_content=profile&utm_medium=member_ios','_blank')">Connect with Cory Johnson on LinkedIn</button></div></section>
-<nav id="nav" class="nav"><button class="tab active" onclick="show('dash',this)"><b>📊</b>Dash</button><button class="tab" onclick="show('schedule',this)"><b>📅</b>Schedule</button><button class="tab" onclick="show('messages',this)"><b>💬</b>Messages</button><button class="tab" onclick="show('reports',this)"><b>📋</b>Reports</button><button class="tab" onclick="show('sites',this)"><b>🗺️</b>Sites</button><button class="tab" onclick="show('admin',this)"><b>⚙️</b>Tools</button></nav></div>
+body {
+  background:#0b0f1a;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+  padding:20px;
+}
+
+button {
+  display:block;
+  width:90%;
+  margin:10px auto;
+  padding:15px;
+  font-size:18px;
+  background:orange;
+  border:none;
+  border-radius:8px;
+}
+
+.hidden { display:none; }
+
+.alert {
+  background:red;
+  padding:10px;
+  margin:10px;
+  border-radius:6px;
+  animation:flash 1s infinite;
+}
+
+@keyframes flash {
+  0%{opacity:1;}
+  50%{opacity:.5;}
+  100%{opacity:1;}
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>LIVE OPERATIONS SIMULATION</h1>
+<h2>SiteControl</h2>
+<p>NOT A GAME — Real Ops Decision System</p>
+
+<input id="name" placeholder="Enter your name" style="padding:10px; width:80%;"/>
+
+<h3>Select Role</h3>
+<button onclick="start('Manager')">Manager</button>
+<button onclick="start('Supervisor')">Supervisor</button>
+<button onclick="start('Officer')">Officer</button>
+<button onclick="start('Client')">Client</button>
+
+<div id="dashboard" class="hidden">
+  <h2 id="title"></h2>
+
+  <div id="alerts"></div>
+
+  <p id="scenarioText"></p>
+
+  <button onclick="decision(0)">Ignore situation</button>
+  <button onclick="decision(1)">Call backup</button>
+  <button onclick="decision(2)">Cover post yourself</button>
+</div>
+
+<div id="result" class="hidden">
+  <h2>FINAL PERFORMANCE</h2>
+  <p id="scoreText"></p>
+</div>
+
 <script>
-let visitor='Mary', role='Manager', alerts=0, reports=0, score=78, selectedOfficer='J. Mason';
-let strengths=[], warnings=['Initial alerts require active manager review.'];
-let officers=[{name:'C. Johnson',available:false,shift:'6 AM - 2 PM',site:'Harbor Point Tower'},{name:'J. Mason',available:true,shift:'10 AM - 7 PM',site:'Harbor Point Tower'},{name:'L. Chen',available:true,shift:'Off until 10 AM',site:'River North Plaza'},{name:'R. Davis',available:true,shift:'Available today',site:'South Loop Campus'}];
-let shifts=[{site:'Harbor Point Tower',post:'Front Desk',officer:'C. Johnson',time:'6 AM - 2 PM',status:'Covered'},{site:'Harbor Point Tower',post:'ER',officer:'J. Mason',time:'10 AM - 7 PM',status:'Covered'},{site:'River North Plaza',post:'Lobby',officer:'L. Chen',time:'8 AM - 5 PM',status:'Covered'},{site:'River North Plaza',post:'Parking',officer:'Unassigned',time:'7 PM - 3 AM',status:'Uncovered'},{site:'South Loop Campus',post:'Dock',officer:'R. Davis',time:'8 AM - 5 PM',status:'Covered'},{site:'South Loop Campus',post:'Main Entry',officer:'Unassigned',time:'10 PM - 6 AM',status:'Uncovered'}];
-let threads=[], reportList=[];
-function startDemo(){visitor=visitorName.value||'Visitor'; role=visitorRole.value;top.classList.add('on');nav.classList.add('on');welcome.innerText='Welcome '+visitor;roleHeader.innerText=role+' Dashboard';if(role==='Client'){managerControls.style.display='none';clientControls.style.display='block';dashSub.innerText='Client service view · updates, concerns, files, and reports'}show('dash');toastPop('Welcome '+visitor,'Live operations simulation started.');feed(visitor+' entered the demo as '+role+'.');setTimeout(clientDelivery,700);setTimeout(lateOfficer,1600);setTimeout(nightCalloff,2700);renderAll()}
-function show(id,btn){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='review')renderReview();renderAll()}
-function toastPop(t,b){toastTitle.innerText=t;toastBody.innerText=b;toast.classList.add('on');setTimeout(()=>toast.classList.remove('on'),3300)}
-function feed(x){if(feed)feed.innerHTML='<div class="item"><div class="it">'+x+'</div><div class="is">Just now</div></div>'+feed.innerHTML}
-function addAlert(){alerts++;updateMetrics()} function clearAlert(){if(alerts>0)alerts--;updateMetrics()}
-function updateMetrics(){alertCount.innerText=alerts;badge.innerText=alerts+' alerts';reportCount.innerText=reports;let c=shifts.filter(s=>s.status==='Covered').length;coverage.innerText=Math.round(c/shifts.length*100)+'%'}
-function addThread(title,sub,msgs){threads.unshift({id:'t'+Date.now()+Math.random(),title,sub,msgs});addAlert();renderThreads()}
-function addReport(title,type,details){reportList.unshift({title,type,details,status:'Open'});reports++;updateMetrics();renderReports()}
-function point(good,msg){score+=good;if(good>0)strengths.push(msg);else warnings.push(msg);if(score>98)score=98;if(score<50)score=50}
-function clientDelivery(){addThread('Client: Delivery Change','Delivery now 5 PM, not 8 AM',[{from:'Client',to:visitor,text:'Deliveries will arrive at 5:00 PM instead of 8:00 AM. Please confirm before assigning officer tasks.'}]);addReport('Client Delivery Change','Client Update','Delivery changed from 8 AM to 5 PM. Waiting for manager confirmation.');feed('Client update received: delivery moved to 5 PM. Confirmation required.');toastPop('Client update','Delivery moved to 5 PM. Confirm in Tools.');point(-2,'Delivery update must be confirmed before assigning field tasks.')}
-function confirmDelivery(){addThread('Task: 5 PM Delivery','Assigned to J. Mason',[{from:visitor,to:'J. Mason',text:'Client confirmed 5 PM delivery. Prepare front desk/dock and update me when truck arrives.'},{from:'Client',to:visitor,text:'Thank you for confirming the delivery update.'}]);addReport('Delivery Task Assigned','Task Report',visitor+' confirmed 5 PM delivery, notified client, and assigned J. Mason.');feed('Delivery confirmed, task assigned, client notified.');toastPop('Task sent','J. Mason received delivery task.');point(8,'Confirmed client delivery and notified the officer/team.');clearAlert();renderAll()}
-function lateOfficer(){shifts[0].officer='J. Mason';addThread('Late Arrival: C. Johnson','8 AM officer late; J. Mason asked to come early',[{from:'System',to:visitor,text:'C. Johnson is running late. J. Mason is scheduled at 10 AM and available.'},{from:visitor,to:'J. Mason',text:'Can you come in early for Front Desk?'},{from:'J. Mason',to:visitor,text:'Yes. What time?'},{from:visitor,to:'J. Mason',text:'Please arrive by 7:45 AM.'},{from:'J. Mason',to:visitor,text:'I will be there 15 minutes early.'},{from:'J. Mason',to:visitor,text:'I made it on time. Any task updates?'}]);addReport('Late Arrival Coverage','Schedule Report','J. Mason came in early and Front Desk remained covered.');feed('Late officer handled: J. Mason accepted early arrival.');toastPop('Coverage updated','Front Desk covered.');point(8,'Used available 10 AM officer to prevent an 8 AM coverage gap.');clearAlert();renderAll()}
-function nightCalloff(){let s=shifts.find(x=>x.post==='Main Entry');s.status='Uncovered';s.officer='Unassigned';addThread('Call-Off: Night Shift','Replacement needed',[{from:'System',to:visitor,text:'Night shift call-off for South Loop Campus Main Entry, 10 PM - 6 AM.'},{from:visitor,to:'R. Davis',text:'Can you cover Main Entry 10 PM - 6 AM?'},{from:'R. Davis',to:visitor,text:'Yes, I can cover it.'}]);addReport('Night Shift Call-Off','Call-Off','Night shift call-off created. R. Davis available for coverage.');feed('Night call-off created. Replacement suggested: R. Davis.');toastPop('Call-off alert','Night shift uncovered. Go to Schedule to fill.');point(-2,'Night shift was uncovered until a replacement was assigned.');renderAll()}
-function assistance(){addThread('Assistance: De-escalation','Officer requested supervisor support',[{from:'L. Chen',to:visitor,text:'Need supervisor assistance. Person refusing to leave lobby.'},{from:visitor,to:'J. Mason',text:'Please respond to lobby for de-escalation.'},{from:'J. Mason',to:visitor,text:'On the way. I will be there in 30 minutes.'},{from:visitor,to:'L. Chen',text:'Supervisor is on the way. Keep distance and continue de-escalation.'},{from:'L. Chen',to:visitor,text:'Resolved. Person left after supervisor arrived.'}]);addReport('De-escalation Resolved','Incident Report','Officer requested support, supervisor responded, incident resolved.');feed('Assistance request resolved and report created.');toastPop('Assistance logged','Supervisor reply and officer update included.');point(10,'Escalated assistance correctly and documented the resolved de-escalation.');clearAlert();renderAll()}
-function adminSite(){addThread('Admin: Add New Site','Cory requests new site setup',[{from:'Cory Johnson',to:visitor,text:'Can you add a new site today and assign officers? Client will send protocols and event notes.'}]);feed('Admin requested new site setup.');toastPop('Admin message','Add site from Sites tab.');point(3,'Admin request received for new site setup.')}
-function clientIssue(){addThread('Client Concern: Coverage','Client submitted issue',[{from:'Client',to:visitor,text:'Front entrance coverage looked inconsistent during high traffic. Can this be reviewed?'}]);addReport('Client Coverage Concern','Client Update','Client reported front entrance coverage concern.');feed('Client concern submitted for manager review.');toastPop('Client concern','Manager must respond and document outcome.');point(5,'Client concern was logged and routed to manager.')}
-function clientFile(){addThread('Client File Upload','Emergency protocol uploaded',[{from:'Client',to:visitor,text:'Uploaded fire panel instructions, event notes, and emergency protocol for today.'}]);addReport('Client File Upload','Client Update','Blueprint / protocol file uploaded for officer review.');feed('Client uploaded protocol and building information.');toastPop('File uploaded','Team and manager notified.');point(6,'Client uploaded site information before field activity.')}
-function addNewSite(){let n=newSite.value||'West Medical Center';shifts.push({site:n,post:'Lobby',officer:'Assigned Team',time:'8 AM - 5 PM',status:'Covered'});addThread('Client: New Site Setup','Client thanks '+visitor,[{from:'Client',to:visitor,text:'Thank you for setting up '+n+'. Repairs and event notes are uploaded.'},{from:visitor,to:'Team',text:'New site added: '+n+'. Review tasks and protocols.'}]);addReport('New Site Created','Site Report',n+' created with officers and client notes.');feed('New site created: '+n);toastPop('Site added',n+' is live.');point(7,'Created a new site and communicated site information to team.');renderAll()}
-function createTask(){let t=taskText.value||'Check delivery access and report back';let l=taskLoc.value||'Front Desk';addThread('Task Assigned: '+selectedOfficer,'Task briefing',[{from:visitor,to:selectedOfficer,text:'Task at '+l+': '+t},{from:selectedOfficer,to:visitor,text:'Received. I will update when completed.'}]);addReport('Task Assigned','Task Report',selectedOfficer+' assigned: '+t+' at '+l);feed('Task assigned to '+selectedOfficer);toastPop('Task notification',selectedOfficer+' received briefing.');point(5,'Task briefing assigned with officer notification.')}
-function fillShift(i){let off=officers.find(o=>o.available);if(!off)return;shifts[i].officer=off.name;shifts[i].status='Covered';off.available=false;addThread('Coverage Filled: '+shifts[i].post,'Replacement assigned',[{from:visitor,to:off.name,text:'You are assigned to '+shifts[i].post+' at '+shifts[i].site+' for '+shifts[i].time+'.'},{from:off.name,to:visitor,text:'Confirmed. I will arrive on time.'}]);addReport('Coverage Filled','Schedule Report',off.name+' assigned to '+shifts[i].post+'.');feed('Post filled: '+off.name+' → '+shifts[i].post);toastPop('Post covered',off.name+' assigned.');point(9,'Filled an uncovered post and confirmed replacement.');clearAlert();renderAll()}
-function renderAll(){renderAvailable();renderSchedule();renderThreads();renderReports();renderTaskOfficers();updateMetrics()}
-function renderAvailable(){if(!available)return;available.innerHTML=officers.map(o=>'<div class="item"><div class="row"><div><div class="it">'+o.name+'</div><div class="is">'+o.shift+' · '+o.site+'</div></div><span class="pill '+(o.available?'green':'red')+'">'+(o.available?'Available':'Not available')+'</span></div></div>').join('')}
-function renderSchedule(){if(!scheduleList)return;scheduleList.innerHTML=shifts.map((s,i)=>'<div class="item"><div class="row"><div><div class="it">'+s.site+' · '+s.post+'</div><div class="is">'+s.officer+' · '+s.time+'</div></div><span class="pill '+(s.status==='Covered'?'green':'red')+'">'+s.status+'</span></div>'+(s.status==='Uncovered'?'<button class="btn" onclick="fillShift('+i+')">Fill Post</button>':'')+'</div>').join('')}
-function renderThreads(){if(!threads)return;threads.innerHTML=window.threads.map(t=>'<div class="item" onclick="openThread(\''+t.id+'\')"><div class="it">'+t.title+'</div><div class="is">'+t.sub+'</div><span class="pill gold">'+t.msgs.length+' messages</span></div>').join('')||'<div class="item"><div class="it">No messages yet</div></div>'}
-function openThread(id){let t=threads.find(x=>x.id===id);threadView.innerHTML='<div class="card"><button class="btn dark" onclick="threadView.innerHTML=\'\'">Back</button><h2>'+t.title+'</h2>'+t.msgs.map(m=>'<div class="bubble '+(m.from===visitor?'mine':'')+'"><small>'+m.from+' → '+m.to+'</small>'+m.text+'</div>').join('')+'<textarea id="reply" placeholder="Reply in this thread"></textarea><button class="btn" onclick="replyThread(\''+id+'\')">Send Reply</button></div>'}
-function replyThread(id){let t=threads.find(x=>x.id===id);let val=reply.value||'I am reviewing this now.';t.msgs.push({from:visitor,to:'Thread',text:val});openThread(id);toastPop('Reply sent','Reply stayed inside this thread.');point(2,'Message reply stayed inside the correct thread.')}
-function renderReports(){if(!reportsList)return;reportsList.innerHTML=reportList.map((r,i)=>'<div class="item"><div class="row"><div><div class="it">'+r.title+'</div><div class="is">'+r.type+'</div></div><span class="pill '+(r.status==='Closed'?'green':'gold')+'">'+r.status+'</span></div><p class="sub">'+r.details+'</p><button class="btn greenb" onclick="closeReport('+i+')">Submit / Close Report</button></div>').join('')||'<div class="item"><div class="it">No reports yet</div></div>'}
-function closeReport(i){if(reportList[i].status!=='Closed'){reportList[i].status='Closed';point(4,'Reviewed and closed report documentation.');clearAlert();feed('Report closed: '+reportList[i].title);toastPop('Report closed','Alert count updated.');renderAll();}}
-function renderTaskOfficers(){if(!taskOfficers)return;taskOfficers.innerHTML=officers.map(o=>'<button class="chip '+(selectedOfficer===o.name?'on':'')+'" onclick="selectedOfficer=\''+o.name+'\';renderTaskOfficers()">'+o.name+'</button>').join('')}
-function renderReview(){score.innerText=window.score+'%';strengthsBox.innerHTML=(window.strengths.length?window.strengths:['Completed the live operations simulation.']).map(s=>'<div class="item"><div class="it green">✔ '+s+'</div></div>').join('');warningsBox.innerHTML=(window.warnings.length?window.warnings:['No major warnings missed.']).map(w=>'<div class="item"><div class="it gold">⚠ '+w+'</div></div>').join('')}
-function openFeedback(){window.open('https://forms.gle/Ee9mxgjZByUFkYeo8','_blank')}
-</script></body></html>
+let score = 0;
+let step = 0;
+
+let scenarios = [
+  "🚨 2 Officers called off. No coverage.",
+  "🚨 Client complaining about response delay.",
+  "🚨 Suspicious person reported inside building.",
+  "🚨 Emergency alarm triggered — unknown cause."
+];
+
+function start(role){
+  let name = document.getElementById("name").value || "Operator";
+
+  document.getElementById("title").innerText =
+    role + " " + name + " — LIVE DASHBOARD";
+
+  document.getElementById("dashboard").classList.remove("hidden");
+
+  nextScenario();
+
+  setInterval(randomAlert, 4000);
+}
+
+function randomAlert(){
+  let alertBox = document.getElementById("alerts");
+  let alert = document.createElement("div");
+  alert.className = "alert";
+  alert.innerText = "⚠️ DISPATCH: New activity detected";
+  alertBox.prepend(alert);
+
+  setTimeout(()=>{ alert.remove(); },3000);
+}
+
+function nextScenario(){
+  if(step >= scenarios.length){
+    endSimulation();
+    return;
+  }
+
+  document.getElementById("scenarioText").innerText =
+    scenarios[step];
+}
+
+function decision(choice){
+  if(choice === 2){
+    score += 3;
+  }
+  else if(choice === 1){
+    score += 2;
+  }
+  else{
+    score += 1;
+  }
+
+  step++;
+  nextScenario();
+}
+
+function endSimulation(){
+  document.getElementById("dashboard").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+
+  let rating = Math.min(10, score);
+
+  let message = "";
+
+  if(rating >= 8){
+    message = "🔥 ELITE OPERATOR — Strong leadership decisions";
+  }
+  else if(rating >= 5){
+    message = "⚠️ MID LEVEL — Good but needs improvement";
+  }
+  else{
+    message = "❌ HIGH RISK — Poor operational decisions";
+  }
+
+  document.getElementById("scoreText").innerText =
+    "Score: " + rating + "/10\n" + message;
+}
+</script>
+
+</body>
+</html>
